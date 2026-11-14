@@ -4,6 +4,7 @@ const CACHE = 'cendres-cache';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest',
   'js/phaser.min.js', 'js/main.js', 'js/tiles.js', 'js/world.js', 'js/rng.js',
+  'js/data.js', 'js/state.js', 'js/ui.js', 'js/hud.js', 'js/combat.js', 'js/menu.js',
   'icons/icon-192.png', 'icons/icon-512.png',
 ];
 

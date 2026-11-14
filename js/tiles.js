@@ -171,6 +171,13 @@ def('debris', {}, (c, r) => {
   for (let k = 0; k < 6; k++) R(c, 2 + ((r() * 11) | 0), 3 + ((r() * 10) | 0), 1 + ((r() * 2) | 0), 1, r() < 0.5 ? '#6a6661' : '#8f8b85');
 });
 
+def('crateOpen', { solid: true }, (c) => {
+  R(c, 3, 14, 10, 1, SHADOW);
+  R(c, 3, 7, 10, 7, '#6f5631');
+  R(c, 3, 7, 10, 1, '#5f4627'); R(c, 3, 13, 10, 1, '#5f4627'); R(c, 3, 7, 1, 7, '#5f4627'); R(c, 12, 7, 1, 7, '#5f4627');
+  R(c, 4, 8, 8, 3, '#2a211a'); R(c, 2, 4, 9, 2, '#8b6c3e'); R(c, 2, 4, 9, 1, '#5f4627');
+});
+
 export const TILES = defs;
 export const T = {};
 defs.forEach((d, i) => { T[d.key] = i; });
@@ -228,8 +235,59 @@ export function drawPlayer(c, dir, f) {
   c.restore();
 }
 
+// ---------- Ennemis ----------
+const MOBS = {
+  rat(c) {
+    R(c, 3, 13, 10, 1, SHADOW);
+    R(c, 4, 9, 8, 4, '#6b5a4a'); R(c, 10, 8, 4, 4, '#7a6857'); R(c, 11, 7, 1, 1, '#b08a7a');
+    R(c, 12, 9, 1, 1, '#ff4030'); R(c, 1, 11, 3, 1, '#b08a7a'); R(c, 1, 10, 1, 1, '#b08a7a');
+    R(c, 5, 13, 1, 1, '#4a3d32'); R(c, 10, 13, 1, 1, '#4a3d32'); R(c, 13, 11, 1, 1, '#ffffff');
+  },
+  dog(c) {
+    R(c, 2, 14, 12, 1, SHADOW);
+    R(c, 3, 7, 9, 4, '#5c5148'); R(c, 10, 4, 4, 4, '#665a50'); R(c, 13, 6, 2, 2, '#4a4039');
+    R(c, 10, 3, 1, 2, '#3b332d'); R(c, 12, 5, 1, 1, '#ffd040');
+    R(c, 3, 11, 2, 3, '#4a4039'); R(c, 9, 11, 2, 3, '#4a4039');
+    R(c, 1, 6, 2, 1, '#5c5148'); R(c, 1, 5, 1, 1, '#5c5148'); R(c, 5, 8, 1, 2, '#4a4039'); R(c, 7, 8, 1, 2, '#4a4039');
+  },
+  raider(c) {
+    R(c, 4, 14, 8, 1, SHADOW);
+    R(c, 5, 11, 2, 3, '#2b2a2e'); R(c, 9, 11, 2, 3, '#2b2a2e');
+    R(c, 4, 6, 8, 5, '#3d3a36'); R(c, 3, 6, 1, 2, '#8a8580'); R(c, 12, 6, 1, 2, '#8a8580'); R(c, 4, 10, 8, 1, '#7a4028');
+    R(c, 5, 1, 6, 5, '#2a2420'); R(c, 6, 3, 4, 2, '#8a8580'); R(c, 6, 3, 1, 1, '#ff4030'); R(c, 9, 3, 1, 1, '#ff4030');
+    R(c, 13, 4, 1, 8, '#8b6c3e');
+  },
+  ghoul(c) {
+    R(c, 3, 14, 10, 1, SHADOW);
+    R(c, 5, 11, 2, 3, '#4d5a44'); R(c, 9, 11, 2, 3, '#4d5a44');
+    R(c, 4, 6, 8, 5, '#6f8062'); R(c, 2, 7, 2, 6, '#7d8f6f'); R(c, 12, 7, 2, 6, '#7d8f6f');
+    R(c, 5, 1, 6, 5, '#8fa37f'); R(c, 6, 3, 1, 1, '#d8ff5a'); R(c, 9, 3, 1, 1, '#d8ff5a'); R(c, 7, 5, 2, 1, '#2a211a');
+    R(c, 6, 8, 1, 1, '#a5332c'); R(c, 9, 9, 1, 1, '#a5332c');
+  },
+  drone(c) {
+    R(c, 4, 14, 8, 1, SHADOW);
+    R(c, 3, 5, 10, 6, '#6d7278'); R(c, 5, 3, 6, 2, '#8a9097'); R(c, 7, 7, 2, 2, '#ff4030');
+    R(c, 1, 4, 3, 1, '#2a2a2c'); R(c, 12, 4, 3, 1, '#2a2a2c'); R(c, 8, 1, 1, 2, '#2a2a2c');
+    R(c, 5, 11, 6, 1, '#45464a'); R(c, 4, 9, 1, 1, '#ffd040');
+  },
+};
+
 export function buildTextures(scene) {
   scene.textures.addCanvas('tiles', makeTilesCanvas());
+
+  const names = Object.keys(MOBS);
+  const mc = document.createElement('canvas');
+  mc.width = names.length * 16; mc.height = 16;
+  const mctx = mc.getContext('2d');
+  const mtex = scene.textures.addCanvas('mobs', mc);
+  names.forEach((name, i) => {
+    mctx.save();
+    mctx.translate(i * 16, 0);
+    MOBS[name](mctx);
+    mctx.restore();
+    mtex.add(name, 0, i * 16, 0, 16, 16);
+  });
+  mtex.refresh();
 
   const pc = document.createElement('canvas');
   pc.width = 48; pc.height = 64;
